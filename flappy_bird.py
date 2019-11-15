@@ -1,6 +1,5 @@
 import pygame
 from pygame import image, transform, display, Rect
-import neat
 import os
 import random
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (550,40)
@@ -136,7 +135,7 @@ class Base:
         if self.x[1] + WIN_WIDTH < 0:
             self.x[1] = self.x[0] + WIN_WIDTH
 
-def draw_frame(window, background, bird, base, pipe_list, text):
+def draw_frame(window, background, bird, base, pipe_list, text=None, text_rect=None):
     '''Draws each frame'''
     window.blit(background, (0,0))
 
@@ -151,7 +150,10 @@ def draw_frame(window, background, bird, base, pipe_list, text):
 
     bird.draw(window)
 
-    window.blit(text, (WIN_WIDTH-text.get_width()-10, 10))
+    if text and text_rect:
+        window.blit(text, text_rect)
+    elif text:
+        window.blit(text, (WIN_WIDTH-text.get_width()-10, 10))
 
     display.update()
 
@@ -173,7 +175,7 @@ def game_logic():
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            run = False
+            pgame.quit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 BIRD.jump()
@@ -181,6 +183,9 @@ def game_logic():
     # Update object coordinates
     BIRD.move()
     BASE.move()
+
+    if BIRD.y + BIRD.img.get_width() >= BASE.y:
+        run = False
 
     for PIPE in PIPE_LIST:
         PIPE.move()
@@ -207,19 +212,28 @@ def main():
     global SCORE
     global TEXT
     global PIPE_SPACING
+    clock = pygame.time.Clock()
 
+    # Run game
     run = True
     while run:
         # Set framerate
-        clock = pygame.time.Clock()
         clock.tick(30)
-        # Process game logic and calculate new positions
-        game_logic()
         # Display new frame
         draw_frame(WIN, BG_IMG, BIRD, BASE, PIPE_LIST, TEXT)
+        # Process game logic and calculate new positions
+        game_logic()
+
+    # Game Over
+    font = pygame.font.SysFont("calibri", 100)
+    text = font.render("Score: {}".format(SCORE), True, (255,255,255))
+    text_rect = text.get_rect(center=(WIN_WIDTH/2, WIN_HEIGHT/2))
+    timer = pygame.time.get_ticks()
+
+    while pygame.time.get_ticks() - timer < 2000:
+        draw_frame(WIN, BG_IMG, BIRD, BASE, PIPE_LIST, text, text_rect)
 
     pygame.quit()
-    print("Score: {}".format(SCORE))
 
 if __name__=="__main__":
     main()
