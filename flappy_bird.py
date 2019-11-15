@@ -11,7 +11,7 @@ WIN_HEIGHT = 770 # Background scaled
 WIN_WIDTH = 430
 WIN = display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 display.set_caption("Flappy Bird")
-font = pygame.font.SysFont("calibri", 50)
+font = pygame.font.Font("./font.ttf", 50)
 
 # Loads in images
 BIRD_IMGS = [transform.scale(image.load("imgs/"+PATH), (51,36)) for PATH in os.listdir("imgs/") if "bird" in PATH]
@@ -22,7 +22,7 @@ BASE_IMG = transform.scale(image.load("imgs/base.png"), (WIN_WIDTH, 112))
 
 class Bird:
 
-    def __init__(self, x, y):
+    def __init__(self, x=50, y=330):
 
         # Initialize state variables
         self.x = x
@@ -85,25 +85,26 @@ class Bird:
         rot_rect = rot_img.get_rect(center=self.img.get_rect(topleft=topleft).center)
 
         window.blit(rot_img, rot_rect)
-        pygame.draw.rect(window, (0,255,0), self.hitbox, 2)
+        if __file__ != "flappy_bird.py":
+            pygame.draw.rect(window, (0,255,0), self.hitbox, 2)
 
 
 class Pipe:
 
-    def __init__(self, offset=0):
+    def __init__(self, gap=250, offset=0):
         self.bottom = PIPE_IMGS[0]
         self.top = PIPE_IMGS[1]
         self.vel = 5
-        self.gap = 200
+        self.gap = gap
         self.x = WIN_WIDTH + offset
-        self.y_bot = random.randint(250, WIN_HEIGHT-100)
+        self.y_bot = random.randint(300, WIN_HEIGHT-200)
         self.y_top = self.y_bot - self.gap - 700
         self.hitbox_bot = Rect(self.x, self.y_bot, 75, 700)
         self.hitbox_top = Rect(self.x, self.y_top, 75, 700)
 
     def respawn(self, x):
         self.x = x
-        self.y_bot = random.randint(250, WIN_HEIGHT-100)
+        self.y_bot = random.randint(300, WIN_HEIGHT-200)
         self.y_top = self.y_bot - self.gap - 700
         self.hitbox_bot = Rect(self.x, self.y_bot, 75, 700)
         self.hitbox_top = Rect(self.x, self.y_top, 75, 700)
@@ -142,8 +143,9 @@ def draw_frame(window, background, bird, base, pipe_list, text=None, text_rect=N
     for pipe in pipe_list:
         window.blit(pipe.top, (pipe.x, pipe.y_top))
         window.blit(pipe.bottom, (pipe.x, pipe.y_bot))
-        pygame.draw.rect(window, (255,0,0), pipe.hitbox_bot, 2)
-        pygame.draw.rect(window, (255,0,0), pipe.hitbox_top, 2)
+        if __file__ != "flappy_bird.py":
+            pygame.draw.rect(window, (255,0,0), pipe.hitbox_bot, 2)
+            pygame.draw.rect(window, (255,0,0), pipe.hitbox_top, 2)
 
     window.blit(base.img, (base.x[0], base.y))
     window.blit(base.img, (base.x[1], base.y))
@@ -160,7 +162,7 @@ def draw_frame(window, background, bird, base, pipe_list, text=None, text_rect=N
 BIRD = Bird(50, 330)
 BASE = Base()
 PIPE_SPACING = 250
-PIPE_LIST = [Pipe(0), Pipe(PIPE_SPACING), Pipe(2*PIPE_SPACING)]
+PIPE_LIST = [Pipe(offset=0), Pipe(offset=PIPE_SPACING), Pipe(offset=2*PIPE_SPACING)]
 SCORE = 0
 TEXT = font.render("Score: {}".format(SCORE), True, (255,255,255))
 
@@ -225,9 +227,9 @@ def main():
         game_logic()
 
     # Game Over
-    font = pygame.font.SysFont("calibri", 100)
+    font = pygame.font.Font("./font.ttf", 100)
     text = font.render("Score: {}".format(SCORE), True, (255,255,255))
-    text_rect = text.get_rect(center=(WIN_WIDTH/2, WIN_HEIGHT/2))
+    text_rect = text.get_rect(center=(WIN_WIDTH/2, WIN_HEIGHT/2 - 100))
     timer = pygame.time.get_ticks()
 
     while pygame.time.get_ticks() - timer < 2000:
