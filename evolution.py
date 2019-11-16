@@ -71,9 +71,10 @@ def main(genomes, config):
     # Create base and pipes
     BASE = Base()
     PIPE_SPACING = 275
-    PIPE_LIST = [Pipe(gap=200, offset=0),
-                 Pipe(gap=200, offset=PIPE_SPACING),
-                 Pipe(gap=200, offset=2*PIPE_SPACING)]
+    GAP = 225
+    PIPE_LIST = [Pipe(gap=GAP, offset=0),
+                 Pipe(gap=GAP, offset=PIPE_SPACING),
+                 Pipe(gap=GAP, offset=2*PIPE_SPACING)]
     # Renders initial texts
     SCORE_TEXT = score_font.render("Score: {}".format(SCORE), True, (255,255,255))
     MAX_SCORE_TEXT = stat_font.render("Max : {}".format(MAX_SCORE), True, (0,255,0))
@@ -101,10 +102,10 @@ def main(genomes, config):
             # Bird receives some fitness for moving correctly
             GENOMES[i].fitness += 0.05
             # Inputs for the feedforward network defined by user
-            inputs = [BIRD.y,                                                   # Bird height
-                      BIRD.y - PIPE_LIST[closest_idx].y_bot,                    # Bottom pipe position
-                      BIRD.y - (PIPE_LIST[closest_idx].y_top + 700),            # Top pipe position
-                      PIPE_LIST[closest_idx].x - BIRD.x                         # Distance to next pipe
+            inputs = [BIRD.y / WIN_HEIGHT,                                                   # Bird height
+                     (BIRD.y - PIPE_LIST[closest_idx].y_bot) / (WIN_HEIGHT/2),               # Bottom pipe position
+                     (BIRD.y - (PIPE_LIST[closest_idx].y_top + 700)) / (WIN_HEIGHT/2),       # Top pipe position
+                     (PIPE_LIST[closest_idx].x - BIRD.x) / (PIPE_SPACING - 75)               # Distance to next pipe
                      ]
             # Pass inputs through network
             output = NETS[i].activate(inputs)
@@ -177,6 +178,7 @@ def run(config_path):
     elite_genome = population.run(main)
     # Prints max score and returns elite (best) genome
     print("\nMAX SCORE:", MAX_SCORE)
+    print("\nELITE GENOME:\n{}".format(elite_genome))
 
     return elite_genome
 
